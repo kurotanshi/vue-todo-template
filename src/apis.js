@@ -37,16 +37,6 @@ const userLogout = () => {
   });
 };
 
-// 認證 check
-const authCheck = () => {
-  return request({
-    method: 'get',
-    url: `/check`,
-  });
-};
-
-// ======== 以下待完成 ========
-
 // 取得 TODO 列表
 const getList = () => {
   return request({
@@ -85,7 +75,7 @@ const removeItem = (id) => {
   });
 };
 
-// 完成狀態切換
+// 完成切換
 const toggleItem = (id) => {
   return request({
     method: 'patch',
@@ -93,8 +83,15 @@ const toggleItem = (id) => {
   });
 };
 
+// check
+const authCheck = () => {
+  return request({
+    method: 'get',
+    url: `/check`,
+  });
+};
 
-export default {
+export default{ 
   userReg,
   userLogin,
   userLogout,

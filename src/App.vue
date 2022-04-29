@@ -5,7 +5,7 @@
       alt="logo" />
 
     <!-- 未登入 -->
-    <Login v-bind="userInfo" @update="updateInfo" v-if="!userInfo.isLogin" />
+    <Login v-if="!userInfo.isLogin" />
     <Todo :nickname="userInfo.nickname" @logout="logout" v-else />
 
   </main>
@@ -13,7 +13,9 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
+import { useStore } from 'vuex'
+
 import apis from './apis';
 import Login from './components/Login.vue';
 import Todo from './components/todoList.vue';
@@ -24,12 +26,8 @@ export default {
     Todo
   },
   setup() {
-
-    const userInfo = reactive({
-      isLogin: false,
-      nickname: '',
-      email: '',
-    });
+    const store = useStore();
+    const userInfo = computed(() => store.state.userInfo);
 
     const updateInfo = member => {
       userInfo.isLogin = member.isLogin;
@@ -40,20 +38,13 @@ export default {
     // 預先檢查並登入
     (async () => {
       if (window.localStorage.getItem('token')) {
-        const { email, nickname } = await apis.userLogin({});
-        userInfo.email = email;
-        userInfo.nickname = nickname;
-        userInfo.isLogin = true;
+        store.dispatch('userLogin');
       }
     })();
 
     // 登出
     const logout = () => {
-      apis.userLogout()
-        .then(d => {
-          window.localStorage.removeItem('token');
-          userInfo.isLogin = false;
-        });
+
     };
 
     return {
@@ -64,3 +55,4 @@ export default {
   }
 }
 </script>
+

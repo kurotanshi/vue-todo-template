@@ -27,68 +27,57 @@
 </template>
 
 <script>
-import apis from '../apis';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useStore } from 'vuex'
 
 export default {
-  props: {
-    nickname: String,
-    email: String,
-    isLogin: Boolean
-  },
-  emits: ['update'],
-  setup(props, { emit }) {
+  setup() {
+    const store = useStore();
+
     // 切換表單狀態
     const isRegForm = ref(false);
+    // 密碼
     const password = ref('');
 
+    const email = computed({
+      get: () => store.state.userInfo.email,
+      set: val => store.commit('updateUserEmail', val)
+    });
+    const nickname = computed({
+      get: () => store.state.userInfo.nickname,
+      set: val => store.commit('updateUserNickname', val)
+    });
+
     // 顯示錯誤訊息
-    const errorMessage = ref('');
+    const errorMessage = computed({
+      get: () => store.state.errorMessage,
+      set: val => store.commit('updateErrorMessage', val)
+    });
+
 
     // 註冊或登入
     const userReg = () => {
       errorMessage.value = '';
 
       if (isRegForm.value) {
-        // 註冊
-        apis.userReg({
-          nickname: props.nickname,
-          email: props.email,
+        // 登入
+        store.dispatch('userReg', {
+          nickname: nickname.value,
+          email: email.value,
           password: password.value,
-        })
-          .catch(({ response }) => {
-            errorMessage.value = response.data.message;
-            window.setTimeout(() => { errorMessage.value = ''; }, 5000);
-          })
-          .then(res => {
-            emit('update', {
-              email: res.email,
-              nickname: res.nickname,
-              isLogin: true
-            });
-          });
-
+        });
       } else {
         // 登入
-        apis.userLogin({
-          email: props.email,
+        store.dispatch('userLogin', {
+          email: email.value,
           password: password.value,
-        })
-          .catch(({ response }) => {
-            errorMessage.value = response.data.message;
-            window.setTimeout(() => { errorMessage.value = ''; }, 5000);
-          })
-          .then(res => {
-            emit('update', {
-              email: res.email,
-              nickname: res.nickname,
-              isLogin: true
-            });
-          });
+        });
       }
     };
 
     return {
+      email,
+      nickname,
       password,
       userReg,
       isRegForm,

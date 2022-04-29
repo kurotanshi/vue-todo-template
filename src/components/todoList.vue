@@ -1,6 +1,6 @@
 <template>
   <h1 class="mt-5 fw-normal h3">Hi {{ nickname }}, Welcome Todo List!</h1>
-  <button class="mt-3 btn btn-info !tw-text-white" @click="$emit('logout')">登出</button>
+  <button class="mt-3 btn btn-info !tw-text-white" @click="logout">登出</button>
 
   <div class="mt-5 tw-select-none">
     <input type="text" v-model.trim="content" class="tw-w-full tw-border tw-p-4" @keydown.enter="addItem"
@@ -10,7 +10,7 @@
       <li v-for="item in list" :key="item.id"
         class="list-group-item tw-relative tw-decoration !tw-p-4 hover:tw-bg-fuchsia-100">
         <div class="tw-p-2" v-if="!item.isEdit">
-          <span @click.prevent="toggleItem(item)" class="tw-cursor-pointer">
+          <span @click.prevent="toggleItem(item.id)" class="tw-cursor-pointer">
             <Icon :icon="item.completed_at ? 'akar-icons:circle-check' : 'akar-icons:circle'"
               class="mb-1 tw-inline tw-text-2xl" />
             <span class="tw-ml-2" :class="item.completed_at ? 'tw-line-through' : ''">
@@ -37,9 +37,10 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Icon } from '@iconify/vue';
 import apis from '../apis';
+import { useStore } from 'vuex'
 
 export default {
   props: {
@@ -50,53 +51,40 @@ export default {
   },
   emits: ['logout'],
   setup() {
+    const store = useStore();
     const content = ref('');
-    const list = ref([]);
+    const list = computed(() => store.state.todoList);
+
+    const logout = () => store.dispatch('logout');
 
     // 取得列表
-    apis.getList()
-      .then(({ todos }) => {
-        list.value = todos.map(d => ({ ...d, isEdit: false }));
-      });
+    store.dispatch('getList');
 
     // 新增
-    const addItem = () => {
-      apis.addItem(content.value)
-        .then(d => {
-          content.value = '';
-          list.value.unshift({ ...d, isEdit: false });
-        });
+    const addItem = async () => {
+      await store.dispatch('addItem', content.value);
+      content.value = '';
     };
 
     // 編輯
-    const editItem = (item) => {
-      const { id, content } = item;
-      apis.editItem({ id, content })
-        .then(d => {
-          console.log(d);
-          item.isEdit = false;
-        });
+    const editItem = async item => {
+      await store.dispatch('editItem', item);
     };
 
     // 刪除
-    const removeItem = id => {
-      apis.removeItem(id)
-        .then(d => {
-          list.value = list.value.filter(d => d.id !== id);
-        })
+    const removeItem = async id => {
+      await store.dispatch('removeItem', id);
     };
 
     // 切換完成狀態
-    const toggleItem = item => {
-      apis.toggleItem(item.id)
-        .then(d => {
-          item.completed_at = d.completed_at;
-        })
+    const toggleItem = async id => {
+      await store.dispatch('toggleItem', id);
     };
 
     return {
       content,
       list,
+      logout,
       addItem,
       editItem,
       removeItem,
