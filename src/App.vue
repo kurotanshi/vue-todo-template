@@ -5,18 +5,19 @@
       alt="logo" />
 
     <!-- 未登入 -->
-    <Login v-bind="userInfo" @update="updateInfo" v-if="!userInfo.isLogin" />
-    <Todo :nickname="userInfo.nickname" @logout="logout" v-else />
+    <Login v-if="!userInfo.isLogin" />
+    <Todo v-else />
 
   </main>
   <p class="tw-w-full tw-absolute tw-text-center tw-bottom-4">&copy; 5xRuby 2022</p>
 </template>
 
 <script>
-import { reactive } from 'vue';
-import apis from './apis';
 import Login from './components/Login.vue';
 import Todo from './components/todoList.vue';
+
+import { provide } from 'vue';
+import { useUserInfo } from './compose';
 
 export default {
   components: {
@@ -24,37 +25,14 @@ export default {
     Todo
   },
   setup() {
-
-    const userInfo = reactive({
-      isLogin: false,
-      nickname: '',
-      email: '',
-    });
-
-    const updateInfo = member => {
-      userInfo.isLogin = member.isLogin;
-      userInfo.nickname = member.nickname;
-      userInfo.email = member.email;
-    }
+    const $user = useUserInfo();
+    const { userInfo, updateInfo, login, logout } = $user;
+    provide('$user', $user);
 
     // 預先檢查並登入
-    (async () => {
-      if (window.localStorage.getItem('token')) {
-        const { email, nickname } = await apis.userLogin({});
-        userInfo.email = email;
-        userInfo.nickname = nickname;
-        userInfo.isLogin = true;
-      }
-    })();
-
-    // 登出
-    const logout = () => {
-      apis.userLogout()
-        .then(d => {
-          window.localStorage.removeItem('token');
-          userInfo.isLogin = false;
-        });
-    };
+    if (window.localStorage.getItem('token')) {
+      login();
+    }
 
     return {
       userInfo,

@@ -1,6 +1,6 @@
 <template>
   <h1 class="mt-5 fw-normal h3">Hi {{ nickname }}, Welcome Todo List!</h1>
-  <button class="mt-3 btn btn-info !tw-text-white" @click="$emit('logout')">登出</button>
+  <button class="mt-3 btn btn-info !tw-text-white" @click="logout">登出</button>
 
   <div class="mt-5 tw-select-none">
     <input type="text" v-model.trim="content" class="tw-w-full tw-border tw-p-4" @keydown.enter="addItem"
@@ -37,64 +37,27 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { inject } from 'vue';
 import { Icon } from '@iconify/vue';
-import apis from '../apis';
+import { usetodoList } from '../compose';
 
 export default {
-  props: {
-    nickname: String,
-  },
   components: {
     Icon,
   },
-  emits: ['logout'],
   setup() {
-    const content = ref('');
-    const list = ref([]);
+    const $user = inject('$user');
+    const { userInfo, logout } = $user;
+
+    const $todoList = usetodoList();
+    const { list, content, getList, addItem, editItem, removeItem, toggleItem } = $todoList;
 
     // 取得列表
-    apis.getList()
-      .then(({ todos }) => {
-        list.value = todos.map(d => ({ ...d, isEdit: false }));
-      });
-
-    // 新增
-    const addItem = () => {
-      apis.addItem(content.value)
-        .then(d => {
-          content.value = '';
-          list.value.unshift({ ...d, isEdit: false });
-        });
-    };
-
-    // 編輯
-    const editItem = (item) => {
-      const { id, content } = item;
-      apis.editItem({ id, content })
-        .then(d => {
-          console.log(d);
-          item.isEdit = false;
-        });
-    };
-
-    // 刪除
-    const removeItem = id => {
-      apis.removeItem(id)
-        .then(d => {
-          list.value = list.value.filter(d => d.id !== id);
-        })
-    };
-
-    // 切換完成狀態
-    const toggleItem = item => {
-      apis.toggleItem(item.id)
-        .then(d => {
-          item.completed_at = d.completed_at;
-        })
-    };
+    getList();
 
     return {
+      nickname: userInfo.nickname,
+      logout,
       content,
       list,
       addItem,
