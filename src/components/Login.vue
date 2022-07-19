@@ -1,17 +1,19 @@
 <template>
   <h1 class="my-5 fw-normal h3">請先註冊</h1>
 
-  <div class="form-floating">
-    <input type="text" class="form-control" id="nickname" placeholder="NickName" />
+  <div class="tw-my-10">
     <label for="nickname">NickName</label>
+    <input type="text" class="form-control" id="nickname" placeholder="NickName" />
   </div>
-  <div class="form-floating">
-    <input type="email" class="form-control" id="email" placeholder="name@example.com" />
+  
+  <div class="tw-my-10">
     <label for="email">Email address</label>
+    <input type="email" class="form-control" id="email" placeholder="name@example.com" />
   </div>
-  <div class="form-floating">
-    <input type="password" class="form-control" id="password" placeholder="Password" />
+  
+  <div class="tw-my-10">
     <label for="password">Password</label>
+    <input type="password" class="form-control" id="password" placeholder="Password" />
   </div>
 
   <div v-show="true" class="tw-text-xl tw-my-4 tw-text-red-500">錯誤訊息</div>

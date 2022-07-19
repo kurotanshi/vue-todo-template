@@ -7,7 +7,9 @@
       placeholder="input something...">
 
     <ul class="list-group tw-text-left">
-      <li v-for="item in 5" class="list-group-item tw-relative tw-decoration !tw-p-4 hover:tw-bg-fuchsia-100">
+      <li v-for="item in 5" 
+        :key="item"
+        class="list-group-item tw-relative tw-decoration !tw-p-4 hover:tw-bg-fuchsia-100">
         <div class="tw-p-2">
           <span class="tw-cursor-pointer">
             <Icon icon="akar-icons:circle-check" class="mb-1 tw-inline tw-text-2xl" />
